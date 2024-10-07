@@ -20,6 +20,12 @@ export class HotelRoute {
         this.router.get("/hotels", (req: Request, res: Response, next: NextFunction) => this.authMiddleware.verifyToken(req, res, next), async (req: Request, res: Response) => {
             await this.hotelController.getHotels(req, res);
         });
+        this.router.get("/hotel/details", (req: Request, res: Response, next: NextFunction) => this.authMiddleware.verifyToken(req, res, next), async (req: Request, res: Response) => {
+            await this.hotelController.getHotelDetails(req, res);
+        });
+        this.router.get("/hotel/reviews", (req: Request, res: Response, next: NextFunction) => this.authMiddleware.verifyToken(req, res, next), async (req: Request, res: Response) => {
+            await this.hotelController.getHotelReviews(req, res);
+        });
     }
 
     getRoutes(): Router {

@@ -29,7 +29,6 @@ export class HotelController {
         if (latitude) queryParams.push(`latitude=${latitude}`);
         if (limit) queryParams.push(`limit=${limit}`);
         if (offset) queryParams.push(`offset=${offset}`);
-
         if (queryParams.length > 0) {
             apiUrl += `?${queryParams.join('&')}`;
         }
@@ -59,6 +58,92 @@ export class HotelController {
             console.error("Error fetching hotels:", error);
             return res.status(400).json({
                 message: "Error fetching hotels",
+                status: 400
+            });
+        }
+    }
+
+    async getHotelDetails(req: Request, res: Response) {
+        const { hotelId } = req.query;
+
+        let apiUrl = `${this.liteAPIBaseAPIURL}/hotel`;
+
+        const queryParams: string[] = [];
+
+        if (hotelId) queryParams.push(`hotelId=${hotelId}`);
+        if (queryParams.length > 0) {
+            apiUrl += `?${queryParams.join('&')}`;
+        }
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "GET",
+                headers: {
+                    "X-API-Key": String(this.liteAPISandboxAPIKey),
+                    "accept": "application/json"
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.log(data);
+                throw new Error(data?.error?.description);
+            }
+
+            return res.status(200).json({
+                message: "Hotel details fetched successfully",
+                data: data?.data,
+                status: 200
+            });
+        } catch (error) {
+            console.error("Error fetching hotel details:", error);
+            return res.status(400).json({
+                message: "Error fetching hotel details",
+                status: 400
+            });
+        }
+    }
+
+    async getHotelReviews(req: Request, res: Response) {
+        const { hotelId, limit, offset } = req.query;
+
+        let apiUrl = `${this.liteAPIBaseAPIURL}/reviews`;
+
+        const queryParams: string[] = [];
+
+        if (hotelId) queryParams.push(`hotelId=${hotelId}`);
+        if (limit) queryParams.push(`limit=${limit}`);
+        if (offset) queryParams.push(`offset=${offset}`);
+        if (queryParams.length > 0) {
+            apiUrl += `?${queryParams.join('&')}`;
+        }
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "GET",
+                headers: {
+                    "X-API-Key": String(this.liteAPISandboxAPIKey),
+                    "accept": "application/json"
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.log(data);
+                throw new Error(data?.error?.description);
+            }
+
+            return res.status(200).json({
+                message: "Hotel reviews fetched successfully",
+                data: data?.data,
+                status: 200
+            });
+        } catch (error) {
+            console.error("Error fetching hotel reviews:", error);
+            return res.status(400).json({
+                message: "Error fetching hotel reviews",
                 status: 400
             });
         }
