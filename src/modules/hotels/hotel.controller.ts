@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import dotenv from "dotenv";
 import { ZodError } from "zod";
 import { HotelRateSchema } from "../../schemas/hotels/hotel-rate.schema";
+import { HotelPrebookSchema } from "../../schemas/hotels/hotel-prebook.schema";
 
 dotenv.config();
 export class HotelController {
@@ -199,6 +200,55 @@ export class HotelController {
             }
             return res.status(400).json({
                 message: "Error fetching hotel rates",
+                status: 400
+            });
+        }
+    }
+
+    async initiateHotelPrebooking(req: Request, res: Response) {
+        let apiUrl = `${this.liteAPIBaseAPIURL}/rates/prebook`;
+
+        try {
+            const validatedRequestBody = HotelPrebookSchema.parse(req.body);
+            const { offerId, usePaymentSdk } = validatedRequestBody;
+
+            const payload = {
+                offerId: offerId,
+                usePaymentSdk: usePaymentSdk
+            };
+
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "X-API-Key": String(this.liteAPISandboxAPIKey),
+                    "accept": "application/json",
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error(data);
+                throw new Error(data?.error?.description);
+            }
+
+            return res.status(200).json({
+                message: "Hotel prebooking initiated successfully",
+                data: data?.data,
+                status: 200
+            });
+        } catch (error) {
+            console.error("Error initiating hotel prebooking:", error);
+            if (error instanceof ZodError) {
+                return res.status(400).json({
+                    message: error.errors,
+                    status: 400,
+                });
+            }
+            return res.status(400).json({
+                message: "Error initiating hotel prebooking",
                 status: 400
             });
         }
