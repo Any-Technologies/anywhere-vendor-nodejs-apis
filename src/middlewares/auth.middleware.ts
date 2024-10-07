@@ -10,7 +10,7 @@ export class AuthMiddleware {
 
         if (!token) {
             return res.status(401).json({
-                message: "Missing token for authentication",
+                message: "Authentication failed",
                 status: 401,
             });
         }
