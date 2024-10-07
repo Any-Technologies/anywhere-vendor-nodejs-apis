@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import dotenv from "dotenv";
+import { ZodError } from "zod";
+import { HotelRateSchema } from "../../schemas/hotels/hotel-rate.schema";
 
 dotenv.config();
 export class HotelController {
@@ -15,7 +17,7 @@ export class HotelController {
     async getHotels(req: Request, res: Response) {
         const { countryCode, cityName, hotelName, aiSearch, minReviewsCount, zip, longitude, latitude, limit, offset } = req.query;
 
-        let apiUrl = `${this.liteAPIBaseAPIURL}/hotels`;
+        let apiUrl = `${this.liteAPIBaseAPIURL}/data/hotels`;
 
         const queryParams: string[] = [];
 
@@ -66,7 +68,7 @@ export class HotelController {
     async getHotelDetails(req: Request, res: Response) {
         const { hotelId } = req.query;
 
-        let apiUrl = `${this.liteAPIBaseAPIURL}/hotel`;
+        let apiUrl = `${this.liteAPIBaseAPIURL}/data/hotel`;
 
         const queryParams: string[] = [];
 
@@ -108,7 +110,7 @@ export class HotelController {
     async getHotelReviews(req: Request, res: Response) {
         const { hotelId, limit, offset } = req.query;
 
-        let apiUrl = `${this.liteAPIBaseAPIURL}/reviews`;
+        let apiUrl = `${this.liteAPIBaseAPIURL}/data/reviews`;
 
         const queryParams: string[] = [];
 
@@ -149,4 +151,56 @@ export class HotelController {
         }
     }
 
+    async getHotelRates(req: Request, res: Response) {
+        let apiUrl = `${this.liteAPIBaseAPIURL}/hotels/rates`;
+
+        try {
+            const validatedRequestBody = HotelRateSchema.parse(req.body);
+            const { hotelIds, occupancies, currency, guestNationality, checkin, checkout } = validatedRequestBody;
+
+            const payload = {
+                hotelIds: hotelIds,
+                occupancies: occupancies,
+                currency: currency,
+                guestNationality: guestNationality,
+                checkin: checkin,
+                checkout: checkout
+            };
+
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "X-API-Key": String(this.liteAPISandboxAPIKey),
+                    "accept": "application/json",
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error(data);
+                throw new Error(data?.error?.description);
+            }
+
+            return res.status(200).json({
+                message: "Hotel rates fetched successfully",
+                data: data?.data,
+                status: 200
+            });
+        } catch (error) {
+            console.error("Error fetching hotel rates:", error);
+            if (error instanceof ZodError) {
+                return res.status(400).json({
+                    message: error.errors,
+                    status: 400,
+                });
+            }
+            return res.status(400).json({
+                message: "Error fetching hotel rates",
+                status: 400
+            });
+        }
+    }
 }

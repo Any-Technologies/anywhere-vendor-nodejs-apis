@@ -26,6 +26,9 @@ export class HotelRoute {
         this.router.get("/hotel/reviews", (req: Request, res: Response, next: NextFunction) => this.authMiddleware.verifyToken(req, res, next), async (req: Request, res: Response) => {
             await this.hotelController.getHotelReviews(req, res);
         });
+        this.router.post("/hotel/rates", (req: Request, res: Response, next: NextFunction) => this.authMiddleware.verifyToken(req, res, next), async (req: Request, res: Response) => {
+            await this.hotelController.getHotelRates(req, res);
+        });
     }
 
     getRoutes(): Router {
