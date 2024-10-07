@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { ZodError } from "zod";
 import { HotelRateSchema } from "../../schemas/hotels/hotel-rate.schema";
 import { HotelPrebookSchema } from "../../schemas/hotels/hotel-prebook.schema";
+import { HotelBookSchema } from "../../schemas/hotels/hotel-book.schema";
 
 dotenv.config();
 export class HotelController {
@@ -249,6 +250,58 @@ export class HotelController {
             }
             return res.status(400).json({
                 message: "Error initiating hotel prebooking",
+                status: 400
+            });
+        }
+    }
+
+    async initiateHotelBooking(req: Request, res: Response) {
+        let apiUrl = `${this.liteAPIBaseAPIURL}/rates/book`;
+
+        try {
+            const validatedRequestBody = HotelBookSchema.parse(req.body);
+            const { holder, payment, prebookId, clientReference, guests } = validatedRequestBody;
+
+            const payload = {
+                holder: holder,
+                payment: payment,
+                prebookId: prebookId,
+                clientReference: clientReference,
+                guests: guests
+            };
+
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "X-API-Key": String(this.liteAPISandboxAPIKey),
+                    "accept": "application/json",
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error(data);
+                throw new Error(data?.error?.description);
+            }
+
+            return res.status(200).json({
+                message: "Hotel booking initiated successfully",
+                data: data?.data,
+                status: 200
+            });
+        } catch (error) {
+            console.error("Error initiating hotel booking:", error);
+            if (error instanceof ZodError) {
+                return res.status(400).json({
+                    message: error.errors,
+                    status: 400,
+                });
+            }
+            return res.status(400).json({
+                message: "Error initiating hotel booking",
                 status: 400
             });
         }

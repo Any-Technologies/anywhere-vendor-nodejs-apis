@@ -29,8 +29,11 @@ export class HotelRoute {
         this.router.post("/hotel/rates", (req: Request, res: Response, next: NextFunction) => this.authMiddleware.verifyToken(req, res, next), async (req: Request, res: Response) => {
             await this.hotelController.getHotelRates(req, res);
         });
-        this.router.post("/hotel/prebook", (req: Request, res: Response, next: NextFunction) => this.authMiddleware.verifyToken(req, res, next), async (req: Request, res: Response) => {
+        this.router.post("/hotel/prebooking", (req: Request, res: Response, next: NextFunction) => this.authMiddleware.verifyToken(req, res, next), async (req: Request, res: Response) => {
             await this.hotelController.initiateHotelPrebooking(req, res);
+        });
+        this.router.post("/hotel/booking", (req: Request, res: Response, next: NextFunction) => this.authMiddleware.verifyToken(req, res, next), async (req: Request, res: Response) => {
+            await this.hotelController.initiateHotelBooking(req, res);
         });
     }
 
