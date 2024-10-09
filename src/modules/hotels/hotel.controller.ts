@@ -4,6 +4,7 @@ import { ZodError } from "zod";
 import { HotelRateSchema } from "../../schemas/hotels/hotel-rate.schema";
 import { HotelPrebookSchema } from "../../schemas/hotels/hotel-prebook.schema";
 import { HotelBookSchema } from "../../schemas/hotels/hotel-book.schema";
+import { convertImageUrlToBase64 } from "../../utils/image.util";
 
 dotenv.config();
 export class HotelController {
@@ -93,6 +94,13 @@ export class HotelController {
             if (!response.ok) {
                 console.log(data);
                 throw new Error(data?.error?.description);
+            }
+
+            if (data?.data?.main_photo) {
+                data.data.main_photo = await convertImageUrlToBase64(data?.data?.main_photo);
+            }
+            if (data?.data?.thumbnail) {
+                data.data.thumbnail = await convertImageUrlToBase64(data?.data?.thumbnail);
             }
 
             return res.status(200).json({
