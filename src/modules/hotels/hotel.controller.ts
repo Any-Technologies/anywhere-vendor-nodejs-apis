@@ -4,7 +4,7 @@ import { ZodError } from "zod";
 import { HotelRateSchema } from "../../schemas/hotels/hotel-rate.schema";
 import { HotelPrebookSchema } from "../../schemas/hotels/hotel-prebook.schema";
 import { HotelBookSchema } from "../../schemas/hotels/hotel-book.schema";
-import { convertImageUrlToBase64 } from "../../utils/image.util";
+import { convertImageUrlToBase64Stream } from "../../utils/image.util";
 
 dotenv.config();
 export class HotelController {
@@ -96,13 +96,34 @@ export class HotelController {
                 throw new Error(data?.error?.description);
             }
 
+            const imageUrlsToConvert: any[] = [];
+
             if (data?.data?.main_photo) {
-                data.data.main_photo = await convertImageUrlToBase64(data?.data?.main_photo);
+                imageUrlsToConvert.push(
+                    convertImageUrlToBase64Stream(data.data.main_photo).then(base64 => {
+                        data.data.main_photo = base64;
+                    })
+                );
             }
             if (data?.data?.thumbnail) {
-                data.data.thumbnail = await convertImageUrlToBase64(data?.data?.thumbnail);
+                imageUrlsToConvert.push(
+                    convertImageUrlToBase64Stream(data.data.thumbnail).then(base64 => {
+                        data.data.thumbnail = base64;
+                    })
+                );
             }
-
+            if (data?.data?.hotelImages && Array.isArray(data.data.hotelImages)) {
+                for (const image of data.data.hotelImages) {
+                    if (image.urlHd) {
+                        imageUrlsToConvert.push(
+                            convertImageUrlToBase64Stream(image.urlHd).then(base64 => {
+                                image.urlHd = base64;
+                            })
+                        );
+                    }
+                }
+            }
+            await Promise.all(imageUrlsToConvert);
             return res.status(200).json({
                 message: "Hotel details fetched successfully",
                 data: data?.data,
