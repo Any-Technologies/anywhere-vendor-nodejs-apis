@@ -123,6 +123,21 @@ export class HotelController {
                     }
                 }
             }
+            if (data?.data?.rooms && Array.isArray(data.data.rooms)) {
+                for (const room of data.data.rooms) {
+                    if (room.photos && Array.isArray(room.photos)) {
+                        for (const image of room.photos) {
+                            if (image.hd_url) {
+                                imageUrlsToConvert.push(
+                                    convertImageUrlToBase64Stream(image.hd_url).then(base64 => {
+                                        image.hd_url = base64;
+                                    })
+                                );
+                            }
+                        }
+                    }
+                }
+            }
             await Promise.all(imageUrlsToConvert);
             return res.status(200).json({
                 message: "Hotel details fetched successfully",
