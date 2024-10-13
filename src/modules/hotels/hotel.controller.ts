@@ -54,6 +54,33 @@ export class HotelController {
                 throw new Error(data?.error?.description);
             }
 
+            const imageUrlsToConvert: any[] = [];
+
+            if (data?.data && Array.isArray(data?.data)) {
+                for (let item of data.data) {
+                    if (item.main_photo) {
+                        imageUrlsToConvert.push(
+                            convertImageUrlToBase64Stream(item.main_photo).then(base64 => {
+                                item.main_photo = base64;
+                            })
+                        );
+                    }
+                }
+            }
+
+            if (data?.data && Array.isArray(data?.data)) {
+                for (let item of data.data) {
+                    if (item.thumbnail) {
+                        imageUrlsToConvert.push(
+                            convertImageUrlToBase64Stream(item.thumbnail).then(base64 => {
+                                item.thumbnail = base64;
+                            })
+                        );
+                    }
+                }
+            }
+
+            await Promise.all(imageUrlsToConvert);
             return res.status(200).json({
                 message: "Hotels fetched successfully",
                 data: data?.data,
