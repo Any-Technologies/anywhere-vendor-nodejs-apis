@@ -3,6 +3,7 @@ import cors from "cors";
 import { Request, Response } from "express";
 import { conn } from "./configs/database.config";
 import { HotelRoute } from "./modules/hotels/hotel.route";
+import { WeatherRoute } from "./modules/weather/weather.route";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,6 +17,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use("/vendor/liteapi", new HotelRoute().getRoutes());
+app.use("/vendor/openweather", new WeatherRoute().getRoutes());
 
 app.get("/", (req: Request, res: Response) => {
     res.status(200).json({ message: "Hello World!", status: 200 });
