@@ -14,9 +14,9 @@ export class WeatherController {
     }
 
     async getCurrentWeather(req: Request, res: Response) {
-        const { lat, lon } = req.query;
+        const { lat, lon, units } = req.query;
 
-        let apiUrl = `${this.openWeatherBaseAPIURL}/weather?appid=${this.openWeatherAPIKey}&lat=${lat}&lon=${lon}`;
+        let apiUrl = `${this.openWeatherBaseAPIURL}/weather?appid=${this.openWeatherAPIKey}&lat=${lat}&lon=${lon}&units=${units}`;
 
         try {
             const response = await fetch(apiUrl, {
